@@ -1,0 +1,17 @@
+import { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
+import { useStore } from './useStore';
+
+type StoreContextType = ReturnType<typeof useStore>;
+const StoreContext = createContext<StoreContextType | null>(null);
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const store = useStore();
+  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
+}
+
+export function useStoreContext() {
+  const ctx = useContext(StoreContext);
+  if (!ctx) throw new Error('useStoreContext must be used within StoreProvider');
+  return ctx;
+}
