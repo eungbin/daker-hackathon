@@ -23,7 +23,7 @@ interface RankEntry {
 }
 
 export default function Rankings() {
-  const { leaderboards, submissions } = useStoreContext();
+  const { leaderboards, submissions, teams } = useStoreContext();
   const { currentUser } = useAuth();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
 
@@ -41,6 +41,12 @@ export default function Rankings() {
     return d;
   }, [timeFilter]);
 
+  const teamMap = useMemo(() => {
+    const m = new Map<string, typeof teams[0]>();
+    teams.forEach(t => m.set(`${t.hackathonSlug}:${t.name}`, t));
+    return m;
+  }, [teams]);
+
   const ranked = useMemo(() => {
     const map: Record<string, RankEntry> = {};
 
@@ -48,38 +54,42 @@ export default function Rankings() {
       lb.entries.forEach(entry => {
         if (cutoff && new Date(entry.submittedAt) < cutoff) return;
 
-        // Find submission that matches this entry to get submittedBy
-        const matchSub = submissions.find(
-          s => s.hackathonSlug === slug && s.teamName === entry.teamName
-        );
+        const team = teamMap.get(`${slug}:${entry.teamName}`);
 
-        let key: string;
-        let displayName: string;
-        let isUser = false;
+        type Contributor = { key: string; displayName: string; isUser: boolean };
+        let contributors: Contributor[] = [];
 
-        if (matchSub?.submittedBy && userMap[matchSub.submittedBy]) {
-          key = matchSub.submittedBy;
-          displayName = userMap[matchSub.submittedBy].username;
-          isUser = true;
-        } else {
-          key = `team:${entry.teamName}`;
-          displayName = entry.teamName;
-          isUser = false;
+        if (team?.members && team.members.length > 0) {
+          team.members.forEach(userId => {
+            const user = userMap[userId];
+            if (user) contributors.push({ key: userId, displayName: user.username, isUser: true });
+          });
         }
 
-        if (!map[key]) {
-          map[key] = { key, displayName, isUser, totalScore: 0, hackathonCount: 0, latestSubmittedAt: entry.submittedAt };
+        if (contributors.length === 0) {
+          const matchSub = submissions.find(s => s.hackathonSlug === slug && s.teamName === entry.teamName);
+          if (matchSub?.submittedBy && userMap[matchSub.submittedBy]) {
+            contributors.push({ key: matchSub.submittedBy, displayName: userMap[matchSub.submittedBy].username, isUser: true });
+          } else {
+            contributors.push({ key: `team:${entry.teamName}`, displayName: entry.teamName, isUser: false });
+          }
         }
-        map[key].totalScore += entry.score;
-        map[key].hackathonCount += 1;
-        if (new Date(entry.submittedAt) > new Date(map[key].latestSubmittedAt)) {
-          map[key].latestSubmittedAt = entry.submittedAt;
-        }
+
+        contributors.forEach(({ key, displayName, isUser }) => {
+          if (!map[key]) {
+            map[key] = { key, displayName, isUser, totalScore: 0, hackathonCount: 0, latestSubmittedAt: entry.submittedAt };
+          }
+          map[key].totalScore += entry.score;
+          map[key].hackathonCount += 1;
+          if (new Date(entry.submittedAt) > new Date(map[key].latestSubmittedAt)) {
+            map[key].latestSubmittedAt = entry.submittedAt;
+          }
+        });
       });
     });
 
     return Object.values(map).sort((a, b) => b.totalScore - a.totalScore);
-  }, [leaderboards, submissions, userMap, cutoff]);
+  }, [leaderboards, submissions, userMap, teamMap, cutoff]);
 
   const myRank = currentUser ? ranked.findIndex(r => r.key === currentUser.id) + 1 : 0;
   const myEntry = currentUser ? ranked.find(r => r.key === currentUser.id) : null;

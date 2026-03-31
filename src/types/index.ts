@@ -97,6 +97,7 @@ export interface Team {
   contact: { type: string; url: string; };
   createdAt: string;
   createdBy?: string;
+  members?: string[];
 }
 
 export interface LeaderboardEntry {

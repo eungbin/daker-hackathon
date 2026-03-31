@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# Hacklog
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+해커톤 참가 기록 및 랭킹 관리 웹 애플리케이션. React 19 + TypeScript + Vite + Tailwind CSS 기반의 프론트엔드 전용 프로토타입입니다. 백엔드 없이 모든 상태를 localStorage에서 관리합니다.
 
-Currently, two official plugins are available:
+## 개발 명령어
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev      # Vite dev server (HMR)
+npm run build    # tsc + vite build → dist/
+npm run preview  # dist/ 로컬 서버
+npm run lint     # ESLint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Seed 데이터 & 유저 시스템
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 개요
+
+앱 최초 로드 시 `src/data/` 아래의 JSON 파일들을 localStorage로 자동 시딩합니다. 이미 localStorage에 데이터가 있으면 seed는 무시됩니다.
+
+> **seed 데이터 재적용**: 브라우저 DevTools → Application → Storage → **Clear site data**
+
+---
+
+### Seed 유저 목록 (`src/data/users.json`)
+
+총 26명의 seed 유저가 있으며, 각 팀에 배정되어 있습니다. 모든 seed 유저의 비밀번호는 `seed1234`입니다.
+
+| ID | username | email | 소속 팀 | 역할 |
+|----|----------|-------|---------|------|
+| user-seed-001 | jiho_kim | jiho@example.com | Team Alpha | 리더 |
+| user-seed-002 | suyeon_lee | suyeon@example.com | Team Alpha | 멤버 |
+| user-seed-003 | donghyun_park | donghyun@example.com | Team Alpha | 멤버 |
+| user-seed-004 | areum_choi | areum@example.com | Team Alpha | 멤버 |
+| user-seed-005 | minsu_jung | minsu@example.com | Team Alpha | 멤버 |
+| user-seed-006 | jiwon_yoon | jiwon@example.com | Team Gamma | 리더 |
+| user-seed-007 | hyunwoo_shin | hyunwoo@example.com | Team Gamma | 멤버 |
+| user-seed-008 | sooyoung_han | sooyoung@example.com | Team Gamma | 멤버 |
+| user-seed-009 | seungho_oh | seungho@example.com | PromptRunners | 리더 |
+| user-seed-010 | dahee_kwon | dahee@example.com | PromptRunners | 멤버 |
+| user-seed-011 | jaehun_lim | jaehun@example.com | PromptRunners | 멤버 |
+| user-seed-012 | yejin_moon | yejin@example.com | PromptRunners | 멤버 |
+| user-seed-013 | sungjoon_bae | sungjoon@example.com | AIdeation | 리더 |
+| user-seed-014 | narae_go | narae@example.com | AIdeation | 멤버 |
+| user-seed-015 | sehee_jeon | sehee@example.com | AIdeation | 멤버 |
+| user-seed-016 | minwoo_hong | minwoo@example.com | 404found | 리더 |
+| user-seed-017 | yuri_kang | yuri@example.com | 404found | 멤버 |
+| user-seed-018 | hyeongi_song | hyeongi@example.com | 404found | 멤버 |
+| user-seed-019 | kyungmin_cho | kyungmin@example.com | LGTM | 리더 |
+| user-seed-020 | jiyeon_nam | jiyeon@example.com | LGTM | 멤버 |
+| user-seed-021 | taehyuk_ahn | taehyuk@example.com | LGTM | 멤버 |
+| user-seed-022 | seojun_im | seojun@example.com | CodeCrafters | 리더 |
+| user-seed-023 | haerin_yang | haerin@example.com | CodeCrafters | 멤버 |
+| user-seed-024 | jungwon_ryu | jungwon@example.com | HandoverHeroes | 리더 |
+| user-seed-025 | chaeun_hwang | chaeun@example.com | SpecRunners | 리더 |
+| user-seed-026 | wooseok_bang | wooseok@example.com | SpecRunners | 멤버 |
+
+---
+
+### 팀 ↔ 유저 매핑 (`src/data/teams.json`)
+
+`Team` 타입에 `members: string[]`(userId 배열)과 `leaderId: string`이 추가되어 있습니다.
+
+| teamCode | 팀명 | 해커톤 | createdBy (팀장) | 멤버 수 |
+|----------|------|--------|----------------------|---------|
+| team-001 | CodeCrafters | daker-handover-2026-03 | user-seed-022 | 2 |
+| team-002 | HandoverHeroes | daker-handover-2026-03 | user-seed-024 | 1 |
+| team-003 | PromptRunners | monthly-vibe-coding-2026-02 | user-seed-009 | 4 |
+| team-004 | SpecRunners | daker-handover-2026-03 | user-seed-025 | 2 |
+| team-005 | Team Alpha | aimers-8-model-lite | user-seed-001 | 5 |
+| team-006 | 404found | daker-handover-2026-03 | user-seed-016 | 3 |
+| team-007 | Team Gamma | aimers-8-model-lite | user-seed-006 | 3 |
+| team-008 | AIdeation | monthly-vibe-coding-2026-02 | user-seed-013 | 3 |
+| team-009 | LGTM | daker-handover-2026-03 | user-seed-019 | 3 |
+
+---
+
+### Rankings 점수 집계 방식
+
+Rankings 페이지는 **개인 점수 총합** 기준으로 순위를 산정합니다.
+
 ```
+leaderboard entry 처리 순서:
+  1. entry.teamName + hackathonSlug 로 teams 배열에서 팀 조회
+  2. team.members 가 있으면 → 멤버 전원에게 entry.score 귀속
+  3. team.members 가 없으면 → submission.submittedBy 유저에게 귀속
+  4. 그것도 없으면 → 팀명 key로 fallback (팀 단위 표시)
+```
+
+같은 팀의 모든 멤버가 동일한 점수를 공유합니다.
+
+---
+
+### localStorage 키 목록
+
+| 키 | 초기값 출처 | 비고 |
+|----|-----------|------|
+| `hacklog_users` | `src/data/users.json` | 비어있을 때만 seed 적용 |
+| `hacklog_session` | 없음 | 로그인 시 userId 저장 |
+| `hacklog_hackathons` | `src/data/hackathons.json` | 변경 불가 |
+| `hacklog_details` | `src/data/hackathon_details.json` | 변경 불가 |
+| `hacklog_teams` | `src/data/teams.json` | addTeam() 으로 추가 가능 |
+| `hacklog_leaderboards` | `src/data/leaderboards.json` | addSubmission() 내부에서만 변경 |
+| `hacklog_submissions` | `[]` | addSubmission() |
+| `hacklog_invitations` | `[]` | addInvitation() / updateInvitation() |

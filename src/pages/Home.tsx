@@ -4,11 +4,11 @@ import StatusBadge from '../components/StatusBadge';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { hackathons, leaderboards } = useStoreContext();
+  const { hackathons, leaderboards, teams } = useStoreContext();
 
   const ongoingCount = hackathons.filter(h => h.status === 'ongoing').length;
   const totalSubmissions = Object.values(leaderboards).reduce((sum, lb) => sum + lb.entries.length, 0);
-  const totalTeams = Object.values(leaderboards).reduce((sum, lb) => sum + lb.entries.length, 0);
+  const totalTeams = teams.length;
 
   const featuredHackathons = hackathons.slice(0, 3);
 
@@ -56,7 +56,7 @@ export default function Home() {
           {[
             { label: '진행중 해커톤', value: ongoingCount, suffix: '개' },
             { label: '총 제출 수', value: totalSubmissions, suffix: '건' },
-            { label: '참가팀 수', value: totalTeams * 2, suffix: '팀' },
+            { label: '참가팀 수', value: totalTeams, suffix: '팀' },
           ].map(stat => (
             <div key={stat.label} className="bg-card border border-card-border rounded-xl p-5 text-center">
               <div className="text-3xl font-bold text-primary mb-1">{stat.value}{stat.suffix}</div>

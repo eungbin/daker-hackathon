@@ -1,16 +1,23 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
+import seedUsers from '../data/users.json';
 
 const USERS_KEY = 'hacklog_users';
 const SESSION_KEY = 'hacklog_session';
 
 function getUsers(): User[] {
   try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    const stored = localStorage.getItem(USERS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as User[];
+      if (parsed.length > 0) return parsed;
+    }
   } catch {
-    return [];
+    // parse 실패 시 seed로 fall through
   }
+  localStorage.setItem(USERS_KEY, JSON.stringify(seedUsers));
+  return seedUsers as User[];
 }
 
 interface AuthContextType {
