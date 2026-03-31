@@ -8,12 +8,9 @@ const gradients = [
   'from-blue-900 to-cyan-900',
 ];
 
-const icons = ['⚡', '🧠', '🚀'];
-
 export default function HackathonCard({ hackathon, index = 0 }: { hackathon: Hackathon; index?: number }) {
   const navigate = useNavigate();
   const gradient = gradients[index % gradients.length];
-  const icon = icons[index % icons.length];
 
   const deadline = new Date(hackathon.period.submissionDeadlineAt);
   const now = new Date();
@@ -26,7 +23,6 @@ export default function HackathonCard({ hackathon, index = 0 }: { hackathon: Hac
     >
       {/* Thumbnail */}
       <div className={`h-40 bg-gradient-to-br ${gradient} relative flex items-center justify-center`}>
-        <span className="text-5xl opacity-40 group-hover:opacity-60 transition-opacity">{icon}</span>
         {hackathon.status === 'ongoing' && daysLeft > 0 && (
           <span className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-lg backdrop-blur-sm">
             D-{daysLeft}

@@ -24,5 +24,15 @@
   { "id": "user-seed-023", "username": "haerin_yang", "email": "haerin@example.com", "password": "seed1234", "createdAt": "2026-03-05T09:00:00+09:00" },
   { "id": "user-seed-024", "username": "jungwon_ryu", "email": "jungwon@example.com", "password": "seed1234", "createdAt": "2026-03-06T09:00:00+09:00" },
   { "id": "user-seed-025", "username": "chaeun_hwang", "email": "chaeun@example.com", "password": "seed1234", "createdAt": "2026-03-08T09:00:00+09:00" },
-  { "id": "user-seed-026", "username": "wooseok_bang", "email": "wooseok@example.com", "password": "seed1234", "createdAt": "2026-03-08T09:00:00+09:00" }
+  { "id": "user-seed-026", "username": "wooseok_bang", "email": "wooseok@example.com", "password": "seed1234", "createdAt": "2026-03-08T09:00:00+09:00" },
+  { "id": "user-test-001", "username": "테스터1", "email": "test1@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-002", "username": "테스터2", "email": "test2@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-003", "username": "테스터3", "email": "test3@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-004", "username": "테스터4", "email": "test4@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-005", "username": "테스터5", "email": "test5@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-006", "username": "테스터6", "email": "test6@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-007", "username": "테스터7", "email": "test7@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-008", "username": "테스터8", "email": "test8@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-009", "username": "테스터9", "email": "test9@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-test-010", "username": "테스터10", "email": "test10@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" }
 ]

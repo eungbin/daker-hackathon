@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStoreContext } from '../../store/StoreContext';
+import { useAuth } from '../../store/AuthContext';
 import StatusBadge from '../../components/StatusBadge';
 import OverviewTab from './tabs/OverviewTab';
 import EvalTab from './tabs/EvalTab';
@@ -37,12 +38,16 @@ function isCurrent(dateStr: string, nextDateStr?: string) {
 
 export default function HackathonDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const { hackathons, details } = useStoreContext();
+  const { hackathons, details, teams } = useStoreContext();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [showSchedulePanel, setShowSchedulePanel] = useState(false);
   const hackathon = hackathons.find(h => h.slug === slug);
   const detail = details[slug || ''];
+  const hasMyTeam = currentUser
+    ? teams.some(t => t.hackathonSlug === slug && (t.createdBy === currentUser.id || t.members?.includes(currentUser.id)))
+    : false;
 
   if (!hackathon || !detail) {
     return (
@@ -90,7 +95,7 @@ export default function HackathonDetail() {
               제출 마감: {new Date(hackathon.period.submissionDeadlineAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          {detail.sections.teams.campEnabled && (
+          {detail.sections.teams.campEnabled && !hasMyTeam && (
             <button
               onClick={() => navigate(`/camp?hackathon=${hackathon.slug}`)}
               className="shrink-0 bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-primary/30"

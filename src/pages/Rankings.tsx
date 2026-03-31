@@ -57,7 +57,7 @@ export default function Rankings() {
         const team = teamMap.get(`${slug}:${entry.teamName}`);
 
         type Contributor = { key: string; displayName: string; isUser: boolean };
-        let contributors: Contributor[] = [];
+        const contributors: Contributor[] = [];
 
         if (team?.members && team.members.length > 0) {
           team.members.forEach(userId => {

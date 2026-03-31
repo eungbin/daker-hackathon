@@ -164,6 +164,7 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
       contact: { type: 'link', url: form.contactUrl },
       createdAt: new Date().toISOString(),
       createdBy,
+      members: createdBy ? [createdBy] : [],
     };
     onSubmit(team);
   };

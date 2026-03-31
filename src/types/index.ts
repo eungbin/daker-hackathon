@@ -147,4 +147,5 @@ export interface Invitation {
   teamName: string;
   invitedAt: string;
   status: InvitationStatus;
+  requestedBy?: string; // User.id
 }

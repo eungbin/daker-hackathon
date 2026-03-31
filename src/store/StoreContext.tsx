@@ -10,6 +10,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useStoreContext() {
   const ctx = useContext(StoreContext);
   if (!ctx) throw new Error('useStoreContext must be used within StoreProvider');

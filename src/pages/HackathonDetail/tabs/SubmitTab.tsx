@@ -367,6 +367,7 @@ interface PdfUploadProps {
 }
 
 function PdfUpload({ file, error, onChange }: PdfUploadProps) {
+  // eslint-disable-next-line react-hooks/purity
   const id = `pdf-upload-${Math.random().toString(36).slice(2)}`;
   return (
     <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-colors ${

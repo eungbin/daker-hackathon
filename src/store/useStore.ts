@@ -116,24 +116,26 @@ export function useStore() {
     setInvitations(prev => {
       const updated = prev.map(inv => inv.id === id ? { ...inv, status } : inv);
       localStorage.setItem(KEYS.invitations, JSON.stringify(updated));
-
-      // If accepted, increment memberCount of the team
-      if (status === 'accepted') {
-        const invitation = prev.find(inv => inv.id === id);
-        if (invitation) {
-          setTeams(prevTeams => {
-            const updatedTeams = prevTeams.map(t =>
-              t.teamCode === invitation.teamCode
-                ? { ...t, memberCount: t.memberCount + 1 }
-                : t
-            );
-            localStorage.setItem(KEYS.teams, JSON.stringify(updatedTeams));
-            return updatedTeams;
-          });
-        }
-      }
       return updated;
     });
+
+    if (status === 'accepted') {
+      const invitation = invitations.find(inv => inv.id === id);
+      if (invitation) {
+        setTeams(prev => {
+          const updated = prev.map(t => {
+            if (t.teamCode !== invitation.teamCode) return t;
+            const members = t.members ?? [];
+            const newMembers = invitation.requestedBy && !members.includes(invitation.requestedBy)
+              ? [...members, invitation.requestedBy]
+              : members;
+            return { ...t, memberCount: newMembers.length, members: newMembers };
+          });
+          localStorage.setItem(KEYS.teams, JSON.stringify(updated));
+          return updated;
+        });
+      }
+    }
   };
 
   return {

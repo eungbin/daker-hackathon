@@ -25,7 +25,7 @@ npm run lint     # ESLint
 
 ### Seed 유저 목록 (`src/data/users.json`)
 
-총 26명의 seed 유저가 있으며, 각 팀에 배정되어 있습니다. 모든 seed 유저의 비밀번호는 `seed1234`입니다.
+총 36명의 seed 유저가 있습니다. seed 유저(user-seed-*)의 비밀번호는 `seed1234`, 테스터 계정(user-test-*)의 비밀번호는 `123456`입니다.
 
 | ID | username | email | 소속 팀 | 역할 |
 |----|----------|-------|---------|------|
@@ -55,6 +55,16 @@ npm run lint     # ESLint
 | user-seed-024 | jungwon_ryu | jungwon@example.com | HandoverHeroes | 리더 |
 | user-seed-025 | chaeun_hwang | chaeun@example.com | SpecRunners | 리더 |
 | user-seed-026 | wooseok_bang | wooseok@example.com | SpecRunners | 멤버 |
+| user-test-001 | 테스터1 | test1@a.com | — | — |
+| user-test-002 | 테스터2 | test2@a.com | — | — |
+| user-test-003 | 테스터3 | test3@a.com | — | — |
+| user-test-004 | 테스터4 | test4@a.com | — | — |
+| user-test-005 | 테스터5 | test5@a.com | — | — |
+| user-test-006 | 테스터6 | test6@a.com | — | — |
+| user-test-007 | 테스터7 | test7@a.com | — | — |
+| user-test-008 | 테스터8 | test8@a.com | — | — |
+| user-test-009 | 테스터9 | test9@a.com | — | — |
+| user-test-010 | 테스터10 | test10@a.com | — | — |
 
 ---
 

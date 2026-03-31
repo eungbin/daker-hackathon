@@ -9,6 +9,7 @@ export interface ToastItem {
 // Module-level setter so showToast() can be called from anywhere
 let _setToasts: React.Dispatch<React.SetStateAction<ToastItem[]>> | null = null;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function showToast(message: string, type: ToastItem['type'] = 'info') {
   if (_setToasts) {
     const id = `toast-${Date.now()}-${Math.random()}`;
@@ -16,8 +17,10 @@ export function showToast(message: string, type: ToastItem['type'] = 'info') {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToastManager() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  // eslint-disable-next-line react-hooks/globals
   _setToasts = setToasts;
 
   const remove = useCallback((id: string) => {
