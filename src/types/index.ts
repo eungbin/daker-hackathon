@@ -88,7 +88,7 @@ export interface HackathonDetail {
 
 export interface Team {
   teamCode: string;
-  hackathonSlug: string;
+  hackathonSlug?: string;
   name: string;
   isOpen: boolean;
   memberCount: number;

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { StoreProvider } from './store/StoreContext';
 import { AuthProvider } from './store/AuthContext';
 import ToastContainer from './components/ToastContainer';
+import DialogContainer from './components/Dialog';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Hackathons from './pages/Hackathons';
@@ -29,6 +30,7 @@ export default function App() {
             </Routes>
           </main>
           <ToastContainer />
+          <DialogContainer />
         </BrowserRouter>
       </StoreProvider>
     </AuthProvider>

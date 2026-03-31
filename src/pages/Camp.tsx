@@ -46,15 +46,15 @@ export default function Camp() {
             onClick={() => currentUser ? setShowModal(true) : navigate('/login')}
             className="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-primary/30 flex items-center gap-2"
           >
-            <span>+</span> 팀 모집글 생성
+            <span>+</span> 팀 생성
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
           <select
             value={hackathonFilter}
             onChange={e => setHackathonFilter(e.target.value)}
-            className="bg-card border border-card-border text-white text-sm px-4 py-2 rounded-xl focus:outline-none focus:border-primary/50"
+            className="w-full sm:w-auto bg-card border border-card-border text-white text-sm px-4 py-2 rounded-xl focus:outline-none focus:border-primary/50"
           >
             <option value="all">모든 해커톤</option>
             {hackathons.map(h => (
@@ -71,7 +71,7 @@ export default function Camp() {
               <button
                 key={f.key}
                 onClick={() => setSortKey(f.key)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   sortKey === f.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -80,7 +80,7 @@ export default function Camp() {
             ))}
           </div>
 
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 sm:max-w-sm">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -139,7 +139,7 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
     isOpen: true,
     lookingFor: '',
     contactUrl: '',
-    hackathonSlug: hackathons[0]?.slug || '',
+    hackathonSlug: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -155,7 +155,7 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
     if (!validate()) return;
     const team: Team = {
       teamCode: `team-${Date.now()}`,
-      hackathonSlug: form.hackathonSlug,
+      hackathonSlug: form.hackathonSlug || undefined,
       name: form.name.trim(),
       isOpen: form.isOpen,
       memberCount: 1,
@@ -174,7 +174,7 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-card border border-card-border rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-bold text-lg">새 팀 모집글 작성</h2>
+          <h2 className="text-white font-bold text-lg">팀 생성</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none">✕</button>
         </div>
 
@@ -224,12 +224,13 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">해커톤 연결</label>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">해커톤 연결 (선택)</label>
             <select
               value={form.hackathonSlug}
               onChange={e => setForm(f => ({ ...f, hackathonSlug: e.target.value }))}
               className="w-full bg-neutral border border-card-border rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-primary/50"
             >
+              <option value="">없음</option>
               {hackathons.map(h => (
                 <option key={h.slug} value={h.slug}>{h.title}</option>
               ))}

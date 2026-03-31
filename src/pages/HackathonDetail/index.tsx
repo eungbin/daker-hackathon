@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStoreContext } from '../../store/StoreContext';
 import { useAuth } from '../../store/AuthContext';
+import { showConfirm } from '../../components/Dialog';
+import JoinHackathonModal from './JoinHackathonModal';
 import StatusBadge from '../../components/StatusBadge';
 import OverviewTab from './tabs/OverviewTab';
 import EvalTab from './tabs/EvalTab';
@@ -43,11 +45,29 @@ export default function HackathonDetail() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
   const [showSchedulePanel, setShowSchedulePanel] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
   const hackathon = hackathons.find(h => h.slug === slug);
   const detail = details[slug || ''];
   const hasMyTeam = currentUser
     ? teams.some(t => t.hackathonSlug === slug && (t.createdBy === currentUser.id || t.members?.includes(currentUser.id)))
     : false;
+
+  const candidateTeams = useMemo(() =>
+    currentUser
+      ? teams.filter(t =>
+          t.hackathonSlug == null &&
+          (t.createdBy === currentUser.id || t.members?.includes(currentUser.id))
+        )
+      : [],
+    [teams, currentUser]
+  );
+
+  const handleJoinClick = async () => {
+    if (!currentUser) { navigate('/login'); return; }
+    if (candidateTeams.length > 0) { setShowJoinModal(true); return; }
+    const ok = await showConfirm('해커톤에 참여할 수 있는 팀이 없습니다.\n팀을 생성하거나 기존 팀에 참여하시겠습니까?');
+    if (ok) navigate(`/camp?hackathon=${slug}`);
+  };
 
   if (!hackathon || !detail) {
     return (
@@ -70,6 +90,7 @@ export default function HackathonDetail() {
   const { schedule } = detail.sections;
 
   return (
+    <>
     <div className="min-h-screen bg-neutral">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Breadcrumb */}
@@ -97,10 +118,10 @@ export default function HackathonDetail() {
           </div>
           {detail.sections.teams.campEnabled && !hasMyTeam && (
             <button
-              onClick={() => navigate(`/camp?hackathon=${hackathon.slug}`)}
+              onClick={handleJoinClick}
               className="shrink-0 bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-primary/30"
             >
-              이 해커톤 팀 구성하기
+              이 해커톤 참여하기
             </button>
           )}
         </div>
@@ -254,5 +275,16 @@ export default function HackathonDetail() {
         </div>
       </div>
     </div>
+
+      {showJoinModal && currentUser && (
+        <JoinHackathonModal
+          hackathonSlug={slug!}
+          hackathonTitle={hackathon.title}
+          currentUserId={currentUser.id}
+          candidateTeams={candidateTeams}
+          onClose={() => setShowJoinModal(false)}
+        />
+      )}
+    </>
   );
 }

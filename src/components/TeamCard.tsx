@@ -15,7 +15,8 @@ function timeAgo(dateStr: string): string {
 
 export default function TeamCard({ team }: { team: Team }) {
   const { currentUser } = useAuth();
-  const { updateTeam } = useStoreContext();
+  const { updateTeam, hackathons } = useStoreContext();
+  const linkedHackathon = team.hackathonSlug ? hackathons.find(h => h.slug === team.hackathonSlug) : null;
   const isOwner = !!(currentUser && team.createdBy === currentUser.id);
   const [editing, setEditing] = useState(false);
   const [editIntro, setEditIntro] = useState(team.intro);
@@ -119,7 +120,18 @@ export default function TeamCard({ team }: { team: Team }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-1">
+      <div className="flex items-center gap-1.5 text-xs py-1 border-t border-card-border">
+        <svg className="w-3 h-3 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        {linkedHackathon ? (
+          <span className="text-gray-400 truncate">{linkedHackathon.title}</span>
+        ) : (
+          <span className="text-gray-600">참여 중인 대회 없음</span>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500">멤버 {team.memberCount}명</span>
         {team.isOpen && (
           <a
