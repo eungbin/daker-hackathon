@@ -47,7 +47,9 @@ export default function TeamsTab({ detail }: Props) {
 
   const [invitedTeamCodes, setInvitedTeamCodes] = useState<Set<string>>(new Set());
   const [requestPage, setRequestPage] = useState(0);
+  const [memberPage, setMemberPage] = useState(0);
   const REQUESTS_PER_PAGE = 4;
+  const MEMBERS_PER_PAGE = 4;
 
   const handleInvite = (teamCode: string, teamName: string) => {
     const invitation: Invitation = {
@@ -106,15 +108,36 @@ export default function TeamsTab({ detail }: Props) {
 
             {/* Card 2: Members */}
             <div className="bg-card border border-card-border rounded-xl p-5">
-              <div className="flex items-center gap-1.5 mb-3">
-                <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-5-5M9 20H4v-2a4 4 0 015-5m6-5a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span className="text-gray-300 text-sm font-semibold">멤버 ({myTeam.memberCount}명)</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a4 4 0 00-5-5M9 20H4v-2a4 4 0 015-5m6-5a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <span className="text-gray-300 text-sm font-semibold">멤버 ({myTeam.memberCount}명)</span>
+                </div>
+                {(myTeam.members?.length ?? 0) > MEMBERS_PER_PAGE && (
+                  <div className="flex items-center gap-1.5 text-gray-500 text-sm">
+                    <button
+                      onClick={() => setMemberPage(p => Math.max(0, p - 1))}
+                      disabled={memberPage === 0}
+                      className="w-6 h-6 flex items-center justify-center rounded hover:text-white disabled:opacity-30 transition-colors text-base"
+                    >
+                      ‹
+                    </button>
+                    <span className="text-xs">{memberPage + 1} / {Math.ceil((myTeam.members?.length ?? 0) / MEMBERS_PER_PAGE)}</span>
+                    <button
+                      onClick={() => setMemberPage(p => Math.min(Math.ceil((myTeam.members?.length ?? 0) / MEMBERS_PER_PAGE) - 1, p + 1))}
+                      disabled={memberPage >= Math.ceil((myTeam.members?.length ?? 0) / MEMBERS_PER_PAGE) - 1}
+                      className="w-6 h-6 flex items-center justify-center rounded hover:text-white disabled:opacity-30 transition-colors text-base"
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="space-y-2.5">
                 {myTeam.members && myTeam.members.length > 0 ? (
-                  myTeam.members.map(uid => {
+                  myTeam.members.slice(memberPage * MEMBERS_PER_PAGE, (memberPage + 1) * MEMBERS_PER_PAGE).map(uid => {
                     const uname = getUserName(uid);
                     const isTeamLeader = uid === myTeam.createdBy;
                     const initials = uname.slice(0, 2).toUpperCase();
