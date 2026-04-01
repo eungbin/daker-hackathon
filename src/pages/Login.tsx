@@ -23,7 +23,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral flex items-center justify-center px-4">
+    <div className="flex-1 bg-neutral flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link to="/" className="text-white font-bold text-2xl tracking-wider">HACKLOG</Link>

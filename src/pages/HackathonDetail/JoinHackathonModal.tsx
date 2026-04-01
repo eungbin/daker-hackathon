@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useStoreContext } from '../../store/StoreContext';
 import { showToast } from '../../components/Toast';
 import type { Team } from '../../types';
@@ -6,44 +6,21 @@ import type { Team } from '../../types';
 interface Props {
   hackathonSlug: string;
   hackathonTitle: string;
-  currentUserId: string;
   candidateTeams: Team[];
   onClose: () => void;
 }
 
-type JoinTab = 'solo' | 'team';
-
-export default function JoinHackathonModal({ hackathonSlug, hackathonTitle, currentUserId, candidateTeams, onClose }: Props) {
+export default function JoinHackathonModal({ hackathonSlug, hackathonTitle, candidateTeams, onClose }: Props) {
   const { updateTeam } = useStoreContext();
-
-  const soloTeams = useMemo(() =>
-    candidateTeams.filter(t => (t.members?.length ?? t.memberCount) === 1),
-    [candidateTeams]
-  );
-
-  const groupTeams = useMemo(() =>
-    candidateTeams.filter(t =>
-      t.createdBy === currentUserId &&
-      (t.members?.length ?? t.memberCount) >= 2
-    ),
-    [candidateTeams, currentUserId]
-  );
-
-  const [activeTab, setActiveTab] = useState<JoinTab>(() =>
-    soloTeams.length > 0 ? 'solo' : 'team'
-  );
   const [selectedTeamCode, setSelectedTeamCode] = useState<string>('');
-
-  const currentList = activeTab === 'solo' ? soloTeams : groupTeams;
-
-  const handleTabChange = (tab: JoinTab) => {
-    setActiveTab(tab);
-    setSelectedTeamCode('');
-  };
 
   const handleJoin = () => {
     if (!selectedTeamCode) return;
-    updateTeam(selectedTeamCode, { hackathonSlug });
+    const team = candidateTeams.find(t => t.teamCode === selectedTeamCode);
+    const currentSlugs = team?.hackathonSlugs ?? [];
+    if (!currentSlugs.includes(hackathonSlug)) {
+      updateTeam(selectedTeamCode, { hackathonSlugs: [...currentSlugs, hackathonSlug] });
+    }
     showToast(`${hackathonTitle}에 참가했습니다!`, 'success');
     onClose();
   };
@@ -61,45 +38,16 @@ export default function JoinHackathonModal({ hackathonSlug, hackathonTitle, curr
           <button onClick={onClose} className="text-gray-500 hover:text-white text-xl leading-none ml-4">✕</button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mx-6 mb-4 bg-neutral rounded-xl p-1 shrink-0">
-          <button
-            onClick={() => handleTabChange('solo')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'solo' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            개인으로 참가
-          </button>
-          <button
-            onClick={() => handleTabChange('team')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'team' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            팀으로 참가
-          </button>
-        </div>
-
-        {/* Tab description */}
-        <p className="text-gray-500 text-xs px-6 mb-3 shrink-0">
-          {activeTab === 'solo'
-            ? '나 혼자 있는 팀을 선택해 개인 자격으로 참가합니다.'
-            : '내가 리더이고 2인 이상인 팀을 선택해 참가합니다.'}
-        </p>
+        <p className="text-gray-500 text-xs px-6 mb-3 shrink-0">참가할 팀을 선택하세요.</p>
 
         {/* Team list */}
         <div className="flex-1 overflow-y-auto px-6 space-y-2 min-h-0">
-          {currentList.length === 0 ? (
+          {candidateTeams.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-gray-500 text-sm">
-                {activeTab === 'solo'
-                  ? '개인으로 참가할 수 있는 팀이 없습니다.\n1인으로 구성된 팀이 필요합니다.'
-                  : '팀으로 참가할 수 있는 팀이 없습니다.\n리더이면서 2인 이상인 팀이 필요합니다.'}
-              </p>
+              <p className="text-gray-500 text-sm">참가할 수 있는 팀이 없습니다.</p>
             </div>
           ) : (
-            currentList.map(team => {
+            candidateTeams.map(team => {
               const memberCount = team.members?.length ?? team.memberCount;
               const isSelected = selectedTeamCode === team.teamCode;
               return (

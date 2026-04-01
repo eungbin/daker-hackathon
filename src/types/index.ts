@@ -88,7 +88,7 @@ export interface HackathonDetail {
 
 export interface Team {
   teamCode: string;
-  hackathonSlug?: string;
+  hackathonSlugs?: string[];
   name: string;
   isOpen: boolean;
   memberCount: number;
@@ -98,6 +98,8 @@ export interface Team {
   createdAt: string;
   createdBy?: string;
   members?: string[];
+  memberRoles?: Record<string, string>;
+  receivingInvites?: boolean;
 }
 
 export interface LeaderboardEntry {
@@ -147,5 +149,7 @@ export interface Invitation {
   teamName: string;
   invitedAt: string;
   status: InvitationStatus;
-  requestedBy?: string; // User.id
+  requestedBy?: string;    // 'request' 타입: 가입신청한 User.id
+  invitedUserId?: string;  // 'invite' 타입: 초대받은 solo User.id
+  type?: 'request' | 'invite'; // 미설정 시 'request'로 간주 (하위호환)
 }

@@ -122,15 +122,79 @@ export function useStore() {
     if (status === 'accepted') {
       const invitation = invitations.find(inv => inv.id === id);
       if (invitation) {
-        setTeams(prev => {
-          const updated = prev.map(t => {
-            if (t.teamCode !== invitation.teamCode) return t;
-            const members = t.members ?? [];
-            const newMembers = invitation.requestedBy && !members.includes(invitation.requestedBy)
-              ? [...members, invitation.requestedBy]
-              : members;
-            return { ...t, memberCount: newMembers.length, members: newMembers };
+        const userId = invitation.type === 'invite'
+          ? invitation.invitedUserId
+          : invitation.requestedBy;
+
+        // 수락된 팀의 해커톤과 겹치는 다른 pending 요청/초대 자동 거절
+        const acceptedTeamSlugs = new Set(
+          teams.find(t => t.teamCode === invitation.teamCode)?.hackathonSlugs ?? [invitation.hackathonSlug]
+        );
+        setInvitations(prev => {
+          const updated = prev.map(inv => {
+            if (inv.id === id || inv.status !== 'pending') return inv;
+            const invUserId = inv.type === 'invite' ? inv.invitedUserId : inv.requestedBy;
+            if (invUserId !== userId) return inv;
+            if (acceptedTeamSlugs.has(inv.hackathonSlug)) {
+              return { ...inv, status: 'rejected' as const };
+            }
+            return inv;
           });
+          localStorage.setItem(KEYS.invitations, JSON.stringify(updated));
+          return updated;
+        });
+
+        setTeams(prev => {
+          // 합류 대상 팀의 hackathonSlugs 확인 (invitation.hackathonSlug 포함)
+          const targetTeam = prev.find(t => t.teamCode === invitation.teamCode);
+          const targetSlugs = new Set([
+            ...(targetTeam?.hackathonSlugs ?? []),
+            ...(invitation.hackathonSlug ? [invitation.hackathonSlug] : []),
+          ]);
+
+          const updated = prev
+            .map(t => {
+              // 합류 대상 팀: 멤버 추가
+              if (t.teamCode === invitation.teamCode) {
+                const members = t.members ?? [];
+                const newMembers = userId && !members.includes(userId)
+                  ? [...members, userId]
+                  : members;
+                return { ...t, memberCount: newMembers.length, members: newMembers };
+              }
+              // B가 속한 다른 팀 중 겹치는 해커톤이 있으면 처리
+              if (
+                userId &&
+                t.teamCode !== invitation.teamCode &&
+                (t.createdBy === userId || t.members?.includes(userId)) &&
+                (t.hackathonSlugs ?? []).some(s => targetSlugs.has(s))
+              ) {
+                const isSolo = (t.members?.length ?? t.memberCount) === 1;
+                if (isSolo) {
+                  // solo 팀: 겹치는 hackathonSlugs만 제거
+                  const remaining = (t.hackathonSlugs ?? []).filter(s => !targetSlugs.has(s));
+                  return { ...t, hackathonSlugs: remaining };
+                } else {
+                  // multi 팀: B만 제거, 팀은 유지
+                  const newMembers = (t.members ?? []).filter(m => m !== userId);
+                  const newCreatedBy = t.createdBy === userId ? newMembers[0] : t.createdBy;
+                  return { ...t, memberCount: newMembers.length, members: newMembers, createdBy: newCreatedBy };
+                }
+              }
+              return t;
+            })
+            // hackathonSlugs가 비어있는 solo 팀 삭제
+            .filter(t => {
+              if (
+                userId &&
+                (t.createdBy === userId || t.members?.includes(userId)) &&
+                (t.members?.length ?? t.memberCount) === 1 &&
+                t.teamCode !== invitation.teamCode &&
+                (t.hackathonSlugs ?? []).length === 0
+              ) return false;
+              return true;
+            });
+
           localStorage.setItem(KEYS.teams, JSON.stringify(updated));
           return updated;
         });

@@ -31,7 +31,7 @@ export default function Hackathons() {
   const visible = filtered.slice(0, visibleCount);
 
   return (
-    <div className="min-h-screen bg-neutral">
+    <div className="bg-neutral">
       <div className="max-w-7xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8">

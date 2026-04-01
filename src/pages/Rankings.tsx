@@ -43,7 +43,7 @@ export default function Rankings() {
 
   const teamMap = useMemo(() => {
     const m = new Map<string, typeof teams[0]>();
-    teams.forEach(t => m.set(`${t.hackathonSlug}:${t.name}`, t));
+    teams.forEach(t => (t.hackathonSlugs ?? []).forEach(slug => m.set(`${slug}:${t.name}`, t)));
     return m;
   }, [teams]);
 
@@ -100,7 +100,7 @@ export default function Rankings() {
   const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
 
   return (
-    <div className="min-h-screen bg-neutral">
+    <div className="bg-neutral">
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
 

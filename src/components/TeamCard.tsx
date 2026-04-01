@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Team } from '../types';
+import { useState, useMemo } from 'react';
+import type { Invitation, Team } from '../types';
 import { useAuth } from '../store/AuthContext';
 import { useStoreContext } from '../store/StoreContext';
 
@@ -15,12 +15,67 @@ function timeAgo(dateStr: string): string {
 
 export default function TeamCard({ team }: { team: Team }) {
   const { currentUser } = useAuth();
-  const { updateTeam, hackathons } = useStoreContext();
-  const linkedHackathon = team.hackathonSlug ? hackathons.find(h => h.slug === team.hackathonSlug) : null;
+  const { teams, invitations, addInvitation, updateTeam, hackathons } = useStoreContext();
+  const linkedHackathons = (team.hackathonSlugs ?? []).map(s => hackathons.find(h => h.slug === s)).filter(Boolean);
   const isOwner = !!(currentUser && team.createdBy === currentUser.id);
+  const isMember = !!(currentUser && team.members?.includes(currentUser.id));
   const [editing, setEditing] = useState(false);
   const [editIntro, setEditIntro] = useState(team.intro);
   const [editLookingFor, setEditLookingFor] = useState(team.lookingFor.join(', '));
+
+  // 이 팀의 해커톤들 중 내가 이미 참가 중인 해커톤 슬러그 목록
+  // (각 슬러그별로 내 팀이 있는지 확인, solo 여부도 함께 파악)
+  const myTeamsPerSlug = useMemo(() => {
+    if (!currentUser || !team.hackathonSlugs?.length) return new Map<string, typeof teams[0]>();
+    const map = new Map<string, typeof teams[0]>();
+    for (const slug of team.hackathonSlugs) {
+      const found = teams.find(
+        t => t.hackathonSlugs?.includes(slug) &&
+             (t.createdBy === currentUser.id || t.members?.includes(currentUser.id))
+      );
+      if (found) map.set(slug, found);
+    }
+    return map;
+  }, [teams, currentUser, team.hackathonSlugs]);
+
+  // 가입신청 가능 여부: 해커톤에 소속된 팀이고, 모든 해커톤에서 내 팀이 없거나 solo인 경우
+  const canApply = useMemo(() => {
+    if (!currentUser || !team.isOpen || isOwner || isMember) return false;
+    if (!team.hackathonSlugs?.length) return false;
+    // 어느 하나의 해커톤에서라도 multi 팀으로 참가 중이면 불가
+    for (const [, myTeam] of myTeamsPerSlug) {
+      if ((myTeam.members?.length ?? myTeam.memberCount) > 1) return false;
+    }
+    return true;
+  }, [currentUser, team.isOpen, team.hackathonSlugs, isOwner, isMember, myTeamsPerSlug]);
+
+  // 가입신청 상태 조회 (teamCode 기준 최신 1건)
+  const latestRequest = useMemo(() =>
+    !currentUser ? undefined :
+    invitations
+      .filter(inv =>
+        inv.teamCode === team.teamCode &&
+        (inv.type === 'request' || !inv.type) &&
+        inv.requestedBy === currentUser.id
+      )
+      .at(-1),
+    [invitations, currentUser, team.teamCode]
+  );
+
+  const handleApply = () => {
+    if (!currentUser || !team.hackathonSlugs?.length) return;
+    const invitation: Invitation = {
+      id: `inv-${Date.now()}`,
+      hackathonSlug: team.hackathonSlugs[0],
+      teamCode: team.teamCode,
+      teamName: team.name,
+      invitedAt: new Date().toISOString(),
+      status: 'pending',
+      type: 'request',
+      requestedBy: currentUser.id,
+    };
+    addInvitation(invitation);
+  };
 
   const handleSave = () => {
     updateTeam(team.teamCode, {
@@ -33,6 +88,27 @@ export default function TeamCard({ team }: { team: Team }) {
   const handleToggleOpen = () => {
     updateTeam(team.teamCode, { isOpen: !team.isOpen });
   };
+
+  const applyButton = (() => {
+    if (!canApply) return null;
+    if (latestRequest?.status === 'accepted') {
+      return <span className="text-xs px-3 py-1 rounded-lg bg-blue-900/40 text-blue-400 border border-blue-700/50">합류 완료</span>;
+    }
+    if (latestRequest?.status === 'rejected') {
+      return <span className="text-xs px-3 py-1 rounded-lg bg-red-900/30 text-red-400 border border-red-700/40">거절됨</span>;
+    }
+    if (latestRequest?.status === 'pending') {
+      return <span className="text-xs px-3 py-1 rounded-lg bg-yellow-900/30 text-yellow-400 border border-yellow-700/40">신청 대기 중</span>;
+    }
+    return (
+      <button
+        onClick={handleApply}
+        className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-lg hover:bg-primary/30 transition-colors"
+      >
+        가입신청
+      </button>
+    );
+  })();
 
   return (
     <div className={`bg-card border border-card-border rounded-xl p-5 space-y-3 transition-all ${
@@ -124,8 +200,8 @@ export default function TeamCard({ team }: { team: Team }) {
         <svg className="w-3 h-3 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-        {linkedHackathon ? (
-          <span className="text-gray-400 truncate">{linkedHackathon.title}</span>
+        {linkedHackathons.length > 0 ? (
+          <span className="text-gray-400 truncate">{linkedHackathons.map(h => h!.title).join(', ')}</span>
         ) : (
           <span className="text-gray-600">참여 중인 대회 없음</span>
         )}
@@ -133,17 +209,20 @@ export default function TeamCard({ team }: { team: Team }) {
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-500">멤버 {team.memberCount}명</span>
-        {team.isOpen && (
-          <a
-            href={team.contact.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-lg hover:bg-primary/30 transition-colors"
-            onClick={e => e.stopPropagation()}
-          >
-            연락하기
-          </a>
-        )}
+        <div className="flex items-center gap-2">
+          {applyButton}
+          {team.isOpen && !applyButton && (
+            <a
+              href={team.contact.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-lg hover:bg-primary/30 transition-colors"
+              onClick={e => e.stopPropagation()}
+            >
+              연락하기
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

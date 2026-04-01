@@ -49,17 +49,17 @@ export default function HackathonDetail() {
   const hackathon = hackathons.find(h => h.slug === slug);
   const detail = details[slug || ''];
   const hasMyTeam = currentUser
-    ? teams.some(t => t.hackathonSlug === slug && (t.createdBy === currentUser.id || t.members?.includes(currentUser.id)))
+    ? teams.some(t => t.hackathonSlugs?.includes(slug ?? '') && (t.createdBy === currentUser.id || t.members?.includes(currentUser.id)))
     : false;
 
   const candidateTeams = useMemo(() =>
     currentUser
       ? teams.filter(t =>
-          t.hackathonSlug == null &&
+          !t.hackathonSlugs?.includes(slug ?? '') &&
           (t.createdBy === currentUser.id || t.members?.includes(currentUser.id))
         )
       : [],
-    [teams, currentUser]
+    [teams, currentUser, slug]
   );
 
   const handleJoinClick = async () => {
@@ -91,7 +91,7 @@ export default function HackathonDetail() {
 
   return (
     <>
-    <div className="min-h-screen bg-neutral">
+    <div className="bg-neutral">
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
@@ -280,7 +280,6 @@ export default function HackathonDetail() {
         <JoinHackathonModal
           hackathonSlug={slug!}
           hackathonTitle={hackathon.title}
-          currentUserId={currentUser.id}
           candidateTeams={candidateTeams}
           onClose={() => setShowJoinModal(false)}
         />

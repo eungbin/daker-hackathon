@@ -23,7 +23,7 @@ export default function LeaderboardTab({ detail }: Props) {
   const hasVote = detail.sections.eval.scoreSource === 'vote';
   const breakdown = detail.sections.eval.scoreDisplay?.breakdown ?? [];
 
-  const hackathonTeams = teams.filter(t => t.hackathonSlug === detail.slug);
+  const hackathonTeams = teams.filter(t => t.hackathonSlugs?.includes(detail.slug));
   const submittedTeamNames = new Set((lb?.entries ?? []).map(e => e.teamName));
   const unsubmittedTeams = hackathonTeams.filter(t => !submittedTeamNames.has(t.name));
 

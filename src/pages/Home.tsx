@@ -13,7 +13,7 @@ export default function Home() {
   const featuredHackathons = hackathons.slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-neutral">
+    <div className="bg-neutral">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent pointer-events-none" />

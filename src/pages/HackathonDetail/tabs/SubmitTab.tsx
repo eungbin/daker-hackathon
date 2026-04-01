@@ -18,7 +18,7 @@ export default function SubmitTab({ detail, onSubmitDone }: Props) {
   const steps = submit.submissionItems ?? [];
 
   const userTeam = currentUser
-    ? teams.find(t => t.hackathonSlug === detail.slug && t.createdBy === currentUser.id)
+    ? teams.find(t => t.hackathonSlugs?.includes(detail.slug) && t.createdBy === currentUser.id)
     : undefined;
 
   const [notes, setNotes] = useState('');

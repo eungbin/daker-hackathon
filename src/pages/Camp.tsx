@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStoreContext } from '../store/StoreContext';
 import { useAuth } from '../store/AuthContext';
 import TeamCard from '../components/TeamCard';
+import CampSidebar from '../components/CampSidebar';
 import type { Team } from '../types';
 
 type SortKey = 'all' | 'recent' | 'urgent';
@@ -19,9 +20,14 @@ export default function Camp() {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
 
+  const myTeams = useMemo(() =>
+    teams.filter(t => currentUser && (t.createdBy === currentUser.id || t.members?.includes(currentUser.id))),
+    [teams, currentUser]
+  );
+
   const filtered = useMemo(() => {
     let result = [...teams];
-    if (hackathonFilter !== 'all') result = result.filter(t => t.hackathonSlug === hackathonFilter);
+    if (hackathonFilter !== 'all') result = result.filter(t => t.hackathonSlugs?.includes(hackathonFilter));
     if (search) {
       result = result.filter(t =>
         t.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -35,82 +41,86 @@ export default function Camp() {
   }, [teams, hackathonFilter, sortKey, search]);
 
   return (
-    <div className="min-h-screen bg-neutral">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-white mb-1">팀원 모집</h1>
-            <p className="text-gray-500 text-sm">함께할 팀원을 찾거나 팀에 합류하세요</p>
-          </div>
-          <button
-            onClick={() => currentUser ? setShowModal(true) : navigate('/login')}
-            className="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-primary/30 flex items-center gap-2"
-          >
-            <span>+</span> 팀 생성
-          </button>
-        </div>
+    <div className="bg-neutral">
+      <div className="max-w-7xl mx-auto px-6 py-10 flex gap-8">
+        <CampSidebar myTeams={myTeams} />
 
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
-          <select
-            value={hackathonFilter}
-            onChange={e => setHackathonFilter(e.target.value)}
-            className="w-full sm:w-auto bg-card border border-card-border text-white text-sm px-4 py-2 rounded-xl focus:outline-none focus:border-primary/50"
-          >
-            <option value="all">모든 해커톤</option>
-            {hackathons.map(h => (
-              <option key={h.slug} value={h.slug}>{h.title}</option>
-            ))}
-          </select>
-
-          <div className="flex gap-1 bg-card border border-card-border rounded-xl p-1">
-            {([
-              { key: 'all', label: '전체' },
-              { key: 'recent', label: '최신 순' },
-              { key: 'urgent', label: '모집중' },
-            ] as const).map(f => (
-              <button
-                key={f.key}
-                onClick={() => setSortKey(f.key)}
-                className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  sortKey === f.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="relative flex-1 sm:max-w-sm">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="팀 검색..."
-              className="w-full bg-card border border-card-border rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
-            />
-          </div>
-        </div>
-
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(team => (
-              <TeamCard key={team.teamCode} team={team} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 text-gray-500">
-            <p>조건에 맞는 팀이 없습니다.</p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-1">팀원 모집</h1>
+              <p className="text-gray-500 text-sm">함께할 팀원을 찾거나 팀에 합류하세요</p>
+            </div>
             <button
               onClick={() => currentUser ? setShowModal(true) : navigate('/login')}
-              className="mt-3 text-primary hover:underline text-sm"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-primary/30 flex items-center gap-2"
             >
-              팀을 만들어 보세요 →
+              <span>+</span> 팀 생성
             </button>
           </div>
-        )}
+
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-6">
+            <select
+              value={hackathonFilter}
+              onChange={e => setHackathonFilter(e.target.value)}
+              className="w-full sm:w-auto bg-card border border-card-border text-white text-sm px-4 py-2 rounded-xl focus:outline-none focus:border-primary/50"
+            >
+              <option value="all">모든 해커톤</option>
+              {hackathons.map(h => (
+                <option key={h.slug} value={h.slug}>{h.title}</option>
+              ))}
+            </select>
+
+            <div className="flex gap-1 bg-card border border-card-border rounded-xl p-1">
+              {([
+                { key: 'all', label: '전체' },
+                { key: 'recent', label: '최신 순' },
+                { key: 'urgent', label: '모집중' },
+              ] as const).map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setSortKey(f.key)}
+                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    sortKey === f.key ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative flex-1 sm:max-w-sm">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="팀 검색..."
+                className="w-full bg-card border border-card-border rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50"
+              />
+            </div>
+          </div>
+
+          {filtered.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map(team => (
+                <TeamCard key={team.teamCode} team={team} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-gray-500">
+              <p>조건에 맞는 팀이 없습니다.</p>
+              <button
+                onClick={() => currentUser ? setShowModal(true) : navigate('/login')}
+                className="mt-3 text-primary hover:underline text-sm"
+              >
+                팀을 만들어 보세요 →
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {showModal && (
@@ -139,7 +149,7 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
     isOpen: true,
     lookingFor: '',
     contactUrl: '',
-    hackathonSlug: '',
+    hackathonSlug: '', // 폼 내부에서만 사용, 제출 시 hackathonSlugs로 변환
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -155,7 +165,7 @@ function CreateTeamModal({ hackathons, onClose, onSubmit, createdBy }: ModalProp
     if (!validate()) return;
     const team: Team = {
       teamCode: `team-${Date.now()}`,
-      hackathonSlug: form.hackathonSlug || undefined,
+      hackathonSlugs: form.hackathonSlug ? [form.hackathonSlug] : undefined,
       name: form.name.trim(),
       isOpen: form.isOpen,
       memberCount: 1,
