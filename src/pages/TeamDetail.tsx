@@ -58,6 +58,18 @@ export default function TeamDetail() {
     setEditingMember(null);
   };
 
+  const kickMember = (memberId: string) => {
+    if (!team) return;
+    const newMembers = (team.members ?? []).filter(id => id !== memberId);
+    const newRoles = { ...(team.memberRoles ?? {}) };
+    delete newRoles[memberId];
+    updateTeam(team.teamCode, {
+      members: newMembers,
+      memberCount: newMembers.length,
+      memberRoles: newRoles,
+    });
+  };
+
   const statusLabel = (status: string) => {
     if (status === 'ongoing') return { text: '진행중', cls: 'text-green-400 bg-green-500/10' };
     if (status === 'upcoming') return { text: '예정', cls: 'text-blue-400 bg-blue-500/10' };
@@ -173,48 +185,94 @@ export default function TeamDetail() {
                       const isEditing = editingMember === memberId;
 
                       return (
-                        <div key={memberId} className="flex items-center gap-4 py-3 first:pt-0 last:pb-0">
-                          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold flex-shrink-0">
-                            {displayName[0]?.toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-medium truncate">{displayName}</p>
-                            {memberId === team.createdBy && (
-                              <span className="text-xs text-yellow-500/80">팀장</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {isEditing && isLeader ? (
-                              <>
-                                <input
-                                  type="text"
-                                  value={roleInput}
-                                  onChange={e => setRoleInput(e.target.value)}
-                                  onKeyDown={e => { if (e.key === 'Enter') saveRole(memberId); if (e.key === 'Escape') setEditingMember(null); }}
-                                  placeholder="포지션 입력"
-                                  className="bg-neutral border border-primary/40 rounded-lg px-2.5 py-1 text-xs text-white w-32 focus:outline-none focus:border-primary"
-                                  autoFocus
-                                />
-                                <button onClick={() => saveRole(memberId)} className="text-xs text-primary hover:text-primary/80 font-medium">저장</button>
-                                <button onClick={() => setEditingMember(null)} className="text-xs text-gray-500 hover:text-gray-300">취소</button>
-                              </>
-                            ) : (
-                              <>
-                                <span className={`text-xs px-2.5 py-0.5 rounded-full ${
-                                  currentRole ? 'bg-white/8 text-gray-300' : 'text-gray-600'
-                                }`}>
-                                  {currentRole || '포지션 미지정'}
-                                </span>
-                                {isLeader && (
-                                  <button
-                                    onClick={() => startEdit(memberId)}
-                                    className="text-xs text-gray-600 hover:text-primary transition-colors"
-                                  >
-                                    편집
-                                  </button>
+                        <div key={memberId} className="py-3 first:pt-0 last:pb-0">
+                          <div className="flex items-start sm:items-center gap-4">
+                            {/* Avatar */}
+                            <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold flex-shrink-0">
+                              {displayName[0]?.toUpperCase()}
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              {/* Name row (공통) */}
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                  <p className="text-white text-sm font-medium truncate">{displayName}</p>
+                                  {memberId === team.createdBy && (
+                                    <span className="text-xs text-yellow-500/80 flex-shrink-0">팀장</span>
+                                  )}
+                                </div>
+                                {/* 데스크탑: 포지션 + 액션 인라인 */}
+                                <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+                                  {isEditing && isLeader ? (
+                                    <>
+                                      <input
+                                        type="text"
+                                        value={roleInput}
+                                        onChange={e => setRoleInput(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter') saveRole(memberId); if (e.key === 'Escape') setEditingMember(null); }}
+                                        placeholder="포지션 입력"
+                                        className="bg-neutral border border-primary/40 rounded-lg px-2.5 py-1 text-xs text-white w-32 focus:outline-none focus:border-primary"
+                                        autoFocus
+                                      />
+                                      <button onClick={() => saveRole(memberId)} className="text-xs text-primary hover:text-primary/80 font-medium">저장</button>
+                                      <button onClick={() => setEditingMember(null)} className="text-xs text-gray-500 hover:text-gray-300">취소</button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className={`text-xs px-1 py-0.5 rounded-full ${
+                                        currentRole ? 'bg-white/8 text-gray-300' : 'text-gray-600'
+                                      }`}>
+                                        {currentRole || '포지션 미지정'}
+                                      </span>
+                                      {isLeader && (
+                                        <>
+                                          <button onClick={() => startEdit(memberId)} className="text-xs text-gray-600 hover:text-primary transition-colors">편집</button>
+                                          {memberId !== team.createdBy ? (
+                                            <button onClick={() => kickMember(memberId)} className="text-xs text-red-500/70 hover:text-red-400 transition-colors">추방하기</button>
+                                          ) : (
+                                            <span className="invisible text-xs">추방하기</span>
+                                          )}
+                                        </>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* 모바일: 포지션 + 액션 아랫줄 */}
+                              <div className="sm:hidden mt-1.5 space-y-1.5">
+                                {isEditing && isLeader ? (
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <input
+                                      type="text"
+                                      value={roleInput}
+                                      onChange={e => setRoleInput(e.target.value)}
+                                      onKeyDown={e => { if (e.key === 'Enter') saveRole(memberId); if (e.key === 'Escape') setEditingMember(null); }}
+                                      placeholder="포지션 입력"
+                                      className="bg-neutral border border-primary/40 rounded-lg px-2.5 py-1 text-xs text-white w-28 focus:outline-none focus:border-primary"
+                                      autoFocus
+                                    />
+                                    <button onClick={() => saveRole(memberId)} className="text-xs text-primary hover:text-primary/80 font-medium">저장</button>
+                                    <button onClick={() => setEditingMember(null)} className="text-xs text-gray-500 hover:text-gray-300">취소</button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <p className={`text-xs ${currentRole ? 'text-gray-300' : 'text-gray-600'}`}>
+                                      {currentRole || '포지션 미지정'}
+                                    </p>
+                                    {isLeader && (
+                                      <div className="flex gap-3">
+                                        <button onClick={() => startEdit(memberId)} className="text-xs text-gray-600 hover:text-primary transition-colors">편집</button>
+                                        {memberId !== team.createdBy && (
+                                          <button onClick={() => kickMember(memberId)} className="text-xs text-red-500/70 hover:text-red-400 transition-colors">추방하기</button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </>
                                 )}
-                              </>
-                            )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );

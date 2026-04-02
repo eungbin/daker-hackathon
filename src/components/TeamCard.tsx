@@ -41,13 +41,12 @@ export default function TeamCard({ team }: { team: Team }) {
   // 가입신청 가능 여부: 해커톤에 소속된 팀이고, 모든 해커톤에서 내 팀이 없거나 solo인 경우
   const canApply = useMemo(() => {
     if (!currentUser || !team.isOpen || isOwner || isMember) return false;
-    if (!team.hackathonSlugs?.length) return false;
     // 어느 하나의 해커톤에서라도 multi 팀으로 참가 중이면 불가
     for (const [, myTeam] of myTeamsPerSlug) {
       if ((myTeam.members?.length ?? myTeam.memberCount) > 1) return false;
     }
     return true;
-  }, [currentUser, team.isOpen, team.hackathonSlugs, isOwner, isMember, myTeamsPerSlug]);
+  }, [currentUser, team.isOpen, isOwner, isMember, myTeamsPerSlug]);
 
   // 가입신청 상태 조회 (teamCode 기준 최신 1건)
   const latestRequest = useMemo(() =>
@@ -63,10 +62,10 @@ export default function TeamCard({ team }: { team: Team }) {
   );
 
   const handleApply = () => {
-    if (!currentUser || !team.hackathonSlugs?.length) return;
+    if (!currentUser) return;
     const invitation: Invitation = {
       id: `inv-${Date.now()}`,
-      hackathonSlug: team.hackathonSlugs[0],
+      hackathonSlug: team.hackathonSlugs?.[0] ?? '',
       teamCode: team.teamCode,
       teamName: team.name,
       invitedAt: new Date().toISOString(),
@@ -211,17 +210,6 @@ export default function TeamCard({ team }: { team: Team }) {
         <span className="text-xs text-gray-500">멤버 {team.memberCount}명</span>
         <div className="flex items-center gap-2">
           {applyButton}
-          {team.isOpen && !applyButton && (
-            <a
-              href={team.contact.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-lg hover:bg-primary/30 transition-colors"
-              onClick={e => e.stopPropagation()}
-            >
-              연락하기
-            </a>
-          )}
         </div>
       </div>
     </div>

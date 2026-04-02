@@ -140,6 +140,15 @@ export interface User {
   createdAt: string;
 }
 
+export interface ChatMessage {
+  id: string;           // 'chat-{Date.now()}-{random}'
+  hackathonSlug: string;
+  userId: string;
+  username: string;
+  content: string;
+  sentAt: string;       // ISO timestamp
+}
+
 export type InvitationStatus = 'pending' | 'accepted' | 'rejected';
 
 export interface Invitation {

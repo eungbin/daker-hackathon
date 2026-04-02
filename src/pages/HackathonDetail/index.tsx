@@ -11,8 +11,9 @@ import TeamsTab from './tabs/TeamsTab';
 import InfoTab from './tabs/InfoTab';
 import SubmitTab from './tabs/SubmitTab';
 import LeaderboardTab from './tabs/LeaderboardTab';
+import ChatTab from './tabs/ChatTab';
 
-type TabKey = 'overview' | 'eval' | 'teams' | 'info' | 'submit' | 'leaderboard';
+type TabKey = 'overview' | 'eval' | 'teams' | 'info' | 'submit' | 'leaderboard' | 'chat';
 
 const tabs: { key: TabKey; label: string; }[] = [
   { key: 'overview', label: '개요' },
@@ -21,6 +22,7 @@ const tabs: { key: TabKey; label: string; }[] = [
   { key: 'info', label: '안내' },
   { key: 'submit', label: '제출' },
   { key: 'leaderboard', label: '리더보드' },
+  { key: 'chat', label: '채팅' },
 ];
 
 function formatDate(dateStr: string) {
@@ -271,6 +273,7 @@ export default function HackathonDetail() {
               <SubmitTab detail={detail} onSubmitDone={() => setActiveTab('leaderboard')} />
             )}
             {activeTab === 'leaderboard' && <LeaderboardTab detail={detail} />}
+            {activeTab === 'chat' && <ChatTab detail={detail} />}
           </main>
         </div>
       </div>

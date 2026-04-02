@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useStoreContext } from '../store/StoreContext';
 import { useAuth } from '../store/AuthContext';
+import { usePagination } from '../hooks/usePagination';
+import Pager from '../components/Pager';
 import type { User } from '../types';
 
 type TimeFilter = '7d' | '30d' | 'all';
@@ -96,6 +98,14 @@ export default function Rankings() {
 
   const top3 = ranked.slice(0, 3);
   const rest = ranked.slice(3);
+
+  const pagination = usePagination(rest.length, 10);
+  const pagedRest = pagination.slice(rest);
+
+  useEffect(() => {
+    pagination.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeFilter]);
 
   const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
 
@@ -211,8 +221,8 @@ export default function Rankings() {
                       <span className="text-right">최근 제출</span>
                     </div>
                     <div className="divide-y divide-card-border">
-                      {rest.map((entry, i) => {
-                        const rank = i + 4;
+                      {pagedRest.map((entry) => {
+                        const rank = rest.indexOf(entry) + 4;
                         const isMe = currentUser && entry.key === currentUser.id;
                         return (
                           <div
@@ -239,6 +249,11 @@ export default function Rankings() {
                         );
                       })}
                     </div>
+                    {pagination.pageCount > 1 && (
+                      <div className="flex justify-center py-3 border-t border-card-border">
+                        <Pager {...pagination} />
+                      </div>
+                    )}
                   </div>
                 )}
               </>

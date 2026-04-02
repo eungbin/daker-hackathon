@@ -12,6 +12,7 @@ export function usePagination(total: number, perPage: number) {
     hasNext: safePage < pageCount - 1,
     prev: () => setPage(p => Math.max(0, p - 1)),
     next: () => setPage(p => Math.min(pageCount - 1, p + 1)),
+    reset: () => setPage(0),
     slice: <T>(items: T[]): T[] => items.slice(safePage * perPage, (safePage + 1) * perPage),
   };
 }

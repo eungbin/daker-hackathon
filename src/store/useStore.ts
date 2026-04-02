@@ -3,7 +3,7 @@ import hackathonsData from '../data/hackathons.json';
 import hackathonDetailsData from '../data/hackathon_details.json';
 import teamsData from '../data/teams.json';
 import leaderboardsData from '../data/leaderboards.json';
-import type { Hackathon, HackathonDetail, Team, Leaderboard, LeaderboardEntry, Submission, Invitation } from '../types';
+import type { Hackathon, HackathonDetail, Team, Leaderboard, LeaderboardEntry, Submission, Invitation, ChatMessage } from '../types';
 
 const KEYS = {
   hackathons: 'hacklog_hackathons',
@@ -12,6 +12,7 @@ const KEYS = {
   leaderboards: 'hacklog_leaderboards',
   submissions: 'hacklog_submissions',
   invitations: 'hacklog_invitations',
+  chats: 'hacklog_chats',
 };
 
 function getOrSeed<T>(key: string, seedData: T): T {
@@ -43,6 +44,9 @@ export function useStore() {
   );
   const [invitations, setInvitations] = useState<Invitation[]>(() =>
     getOrSeed(KEYS.invitations, [])
+  );
+  const [chats, setChats] = useState<Record<string, ChatMessage[]>>(() =>
+    getOrSeed(KEYS.chats, {})
   );
 
   const addTeam = (team: Team) => {
@@ -202,8 +206,17 @@ export function useStore() {
     }
   };
 
+  const addChatMessage = (message: ChatMessage) => {
+    setChats(prev => {
+      const slug = message.hackathonSlug;
+      const updated = { ...prev, [slug]: [...(prev[slug] ?? []), message] };
+      localStorage.setItem(KEYS.chats, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return {
-    hackathons, details, teams, leaderboards, submissions, invitations,
-    addTeam, updateTeam, addSubmission, addInvitation, updateInvitation,
+    hackathons, details, teams, leaderboards, submissions, invitations, chats,
+    addTeam, updateTeam, addSubmission, addInvitation, updateInvitation, addChatMessage,
   };
 }
