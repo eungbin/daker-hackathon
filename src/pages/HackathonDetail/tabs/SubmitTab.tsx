@@ -6,10 +6,11 @@ import { useAuth } from '../../../store/AuthContext';
 
 interface Props {
   detail: HackathonDetail;
+  hackathonStatus: 'upcoming' | 'ongoing' | 'ended';
   onSubmitDone?: () => void;
 }
 
-export default function SubmitTab({ detail, onSubmitDone }: Props) {
+export default function SubmitTab({ detail, hackathonStatus, onSubmitDone }: Props) {
   const { submit } = detail.sections;
   const { addSubmission, teams } = useStoreContext();
   const { currentUser } = useAuth();
@@ -345,9 +346,11 @@ export default function SubmitTab({ detail, onSubmitDone }: Props) {
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/30"
+          disabled={hackathonStatus !== 'ongoing'}
+          title={hackathonStatus === 'upcoming' ? '대회 시작 후 제출할 수 있습니다' : hackathonStatus === 'ended' ? '종료된 대회입니다' : undefined}
+          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all hover:shadow-lg hover:shadow-primary/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none"
         >
-          제출하기
+          {hackathonStatus === 'upcoming' ? '대회 시작 후 제출 가능' : hackathonStatus === 'ended' ? '종료된 대회' : '제출하기'}
         </button>
       </div>
     </div>

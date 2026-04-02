@@ -34,5 +34,6 @@
   { "id": "user-test-007", "username": "테스터7", "email": "test7@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
   { "id": "user-test-008", "username": "테스터8", "email": "test8@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
   { "id": "user-test-009", "username": "테스터9", "email": "test9@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
-  { "id": "user-test-010", "username": "테스터10", "email": "test10@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" }
+  { "id": "user-test-010", "username": "테스터10", "email": "test10@a.com", "password": "123456", "createdAt": "2026-03-31T00:00:00+09:00" },
+  { "id": "user-admin-001", "username": "admin", "email": "admin@a.com", "password": "123456", "createdAt": "2026-01-01T00:00:00+09:00", "isAdmin": true }
 ]

@@ -27,7 +27,7 @@ function getOrSeed<T>(key: string, seedData: T): T {
 }
 
 export function useStore() {
-  const [hackathons] = useState<Hackathon[]>(() =>
+  const [hackathons, setHackathons] = useState<Hackathon[]>(() =>
     getOrSeed(KEYS.hackathons, hackathonsData as Hackathon[])
   );
   const [details] = useState<Record<string, HackathonDetail>>(() =>
@@ -206,6 +206,14 @@ export function useStore() {
     }
   };
 
+  const updateHackathonStatus = (slug: string, status: Hackathon['status']) => {
+    setHackathons(prev => {
+      const updated = prev.map(h => h.slug === slug ? { ...h, status } : h);
+      localStorage.setItem(KEYS.hackathons, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const addChatMessage = (message: ChatMessage) => {
     setChats(prev => {
       const slug = message.hackathonSlug;
@@ -217,6 +225,6 @@ export function useStore() {
 
   return {
     hackathons, details, teams, leaderboards, submissions, invitations, chats,
-    addTeam, updateTeam, addSubmission, addInvitation, updateInvitation, addChatMessage,
+    addTeam, updateTeam, addSubmission, addInvitation, updateInvitation, addChatMessage, updateHackathonStatus,
   };
 }

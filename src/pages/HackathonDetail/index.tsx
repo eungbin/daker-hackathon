@@ -142,7 +142,7 @@ const [showJoinModal, setShowJoinModal] = useState(false);
               제출 마감: {new Date(hackathon.period.submissionDeadlineAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          {detail.sections.teams.campEnabled && !hasMyTeam && (
+          {detail.sections.teams.campEnabled && !hasMyTeam && hackathon.status === 'upcoming' && (
             <button
               onClick={handleJoinClick}
               className="shrink-0 bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all hover:shadow-lg hover:shadow-primary/30"
@@ -213,7 +213,7 @@ const [showJoinModal, setShowJoinModal] = useState(false);
             {activeTab === 'teams' && <TeamsTab detail={detail} />}
             {activeTab === 'info' && <InfoTab detail={detail} />}
             {activeTab === 'submit' && (
-              <SubmitTab detail={detail} onSubmitDone={() => setActiveTab('leaderboard')} />
+              <SubmitTab detail={detail} hackathonStatus={hackathon.status} onSubmitDone={() => setActiveTab('leaderboard')} />
             )}
             {activeTab === 'leaderboard' && <LeaderboardTab detail={detail} />}
             {activeTab === 'chat' && <ChatTab detail={detail} />}

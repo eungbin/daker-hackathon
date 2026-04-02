@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useStoreContext } from '../store/StoreContext';
 import { useAuth } from '../store/AuthContext';
 import TeamCard from '../components/TeamCard';
 import CampSidebar from '../components/CampSidebar';
+import Pager from '../components/Pager';
+import { usePagination } from '../hooks/usePagination';
 import type { Team } from '../types';
 
 type SortKey = 'all' | 'recent' | 'urgent';
@@ -39,6 +41,10 @@ export default function Camp() {
     else if (sortKey === 'urgent') result = result.filter(t => t.isOpen);
     return result;
   }, [teams, hackathonFilter, sortKey, search]);
+
+  const pager = usePagination(filtered.length, 6);
+
+  useEffect(() => { pager.reset(); }, [hackathonFilter, sortKey, search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="bg-neutral">
@@ -104,11 +110,18 @@ export default function Camp() {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filtered.map(team => (
-                <TeamCard key={team.teamCode} team={team} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pager.slice(filtered).map(team => (
+                  <TeamCard key={team.teamCode} team={team} />
+                ))}
+              </div>
+              {pager.pageCount > 1 && (
+                <div className="flex justify-center mt-6">
+                  <Pager {...pager} />
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-20 text-gray-500">
               <p>조건에 맞는 팀이 없습니다.</p>

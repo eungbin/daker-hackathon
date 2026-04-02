@@ -8,6 +8,7 @@ import { usePagination } from '../hooks/usePagination';
 import { showConfirm } from '../components/Dialog';
 import type { User } from '../types';
 
+
 export default function TeamDetail() {
   const { teamCode } = useParams<{ teamCode: string }>();
   const { teams, hackathons, invitations, updateTeam, updateInvitation } = useStoreContext();
@@ -59,6 +60,14 @@ export default function TeamDetail() {
     setEditingMember(null);
   };
 
+  const handleToggleOpen = async () => {
+    if (!team) return;
+    const action = team.isOpen ? '모집을 마감' : '모집을 재개';
+    const ok = await showConfirm(`팀 "${team.name}"의 ${action}하시겠습니까?`);
+    if (!ok) return;
+    updateTeam(team.teamCode, { isOpen: !team.isOpen });
+  };
+
   const kickMember = async (memberId: string) => {
     if (!team) return;
     const displayName = userMap[memberId]?.username ?? memberId;
@@ -100,10 +109,13 @@ export default function TeamDetail() {
               <div className="bg-card border border-card-border rounded-2xl p-6">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                      team.isOpen ? 'bg-green-500/15 text-green-400' : 'bg-gray-500/15 text-gray-400'
-                    }`}>
-                      {team.isOpen ? '모집중' : '모집 완료'}
+                    <span
+                      onClick={isLeader ? handleToggleOpen : undefined}
+                      className={`text-xs px-2.5 py-0.5 rounded-full font-medium transition-colors ${
+                        team.isOpen ? 'bg-green-500/15 text-green-400' : 'bg-gray-500/15 text-gray-400'
+                      } ${isLeader ? 'cursor-pointer hover:opacity-70' : ''}`}
+                    >
+                      {team.isOpen ? '모집중' : '모집 완료'}{isLeader && ' (클릭하여 변경)'}
                     </span>
                     <span className="text-xs text-gray-600 font-mono">{team.teamCode}</span>
                   </div>

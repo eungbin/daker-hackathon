@@ -19,6 +19,7 @@ const rankBg: Record<number, string> = {
 
 export default function LeaderboardTab({ detail }: Props) {
   const { leaderboards, teams } = useStoreContext();
+
   const lb = leaderboards[detail.slug];
   const hasVote = detail.sections.eval.scoreSource === 'vote';
   const breakdown = detail.sections.eval.scoreDisplay?.breakdown ?? [];

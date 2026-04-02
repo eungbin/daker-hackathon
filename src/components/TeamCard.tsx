@@ -39,7 +39,7 @@ export default function TeamCard({ team }: { team: Team }) {
     return map;
   }, [teams, currentUser, team.hackathonSlugs]);
 
-  // 가입신청 가능 여부: 해커톤에 소속된 팀이고, 모든 해커톤에서 내 팀이 없거나 solo인 경우
+  // 가입신청 가능 여부: 팀이 모집중이고, 모든 해커톤에서 내 팀이 없거나 solo인 경우
   const canApply = useMemo(() => {
     if (!currentUser || !team.isOpen || isOwner || isMember) return false;
     // 어느 하나의 해커톤에서라도 multi 팀으로 참가 중이면 불가

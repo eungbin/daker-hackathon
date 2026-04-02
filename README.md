@@ -25,7 +25,9 @@ npm run lint     # ESLint
 
 ### Seed 유저 목록 (`src/data/users.json`)
 
-총 36명의 seed 유저가 있습니다. seed 유저(user-seed-*)의 비밀번호는 `seed1234`, 테스터 계정(user-test-*)의 비밀번호는 `123456`입니다.
+총 37명의 seed 유저가 있습니다. seed 유저(user-seed-*)의 비밀번호는 `seed1234`, 테스터 계정(user-test-*)의 비밀번호는 `123456`입니다.
+
+**어드민 계정** — `admin@a.com` / `123456` (`isAdmin: true`)
 
 | ID | username | email | 소속 팀 | 역할 |
 |----|----------|-------|---------|------|
