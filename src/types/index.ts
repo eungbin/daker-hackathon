@@ -143,6 +143,7 @@ export interface User {
 export interface ChatMessage {
   id: string;           // 'chat-{Date.now()}-{random}'
   hackathonSlug: string;
+  channel: string;      // 'announcements' | 'qna' | 'recruitment'
   userId: string;
   username: string;
   content: string;
