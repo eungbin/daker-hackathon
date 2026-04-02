@@ -123,12 +123,6 @@ export default function SubmitTab({ detail, onSubmitDone }: Props) {
         <p className="text-gray-400 text-sm mb-4">
           이 해커톤에 등록된 팀의 팀장이어야 제출이 가능합니다.
         </p>
-        <button
-          onClick={() => navigate('/camp')}
-          className="bg-primary text-white text-sm px-5 py-2 rounded-xl hover:bg-primary/90 transition-colors"
-        >
-          팀 만들러 가기
-        </button>
       </div>
     );
   }
