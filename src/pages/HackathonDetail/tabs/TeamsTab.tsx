@@ -4,6 +4,7 @@ import { useStoreContext } from '../../../store/StoreContext';
 import { useAuth } from '../../../store/AuthContext';
 import Pager from '../../../components/Pager';
 import { usePagination } from '../../../hooks/usePagination';
+import { showConfirm } from '../../../components/Dialog';
 import type { HackathonDetail, Invitation, Team } from '../../../types';
 
 interface Props {
@@ -63,8 +64,10 @@ export default function TeamsTab({ detail }: Props) {
     );
   };
 
-  const handleSendInvite = (soloTeam: Team) => {
+  const handleSendInvite = async (soloTeam: Team) => {
     if (!myTeam || !currentUser) return;
+    const ok = await showConfirm(`"${soloTeam.name}" 참가자를 팀에 초대하시겠습니까?`);
+    if (!ok) return;
     const soloUserId = soloTeam.members?.[0] ?? soloTeam.createdBy;
     const invitation: Invitation = {
       // eslint-disable-next-line react-hooks/purity
@@ -130,7 +133,9 @@ export default function TeamsTab({ detail }: Props) {
                   </div>
                   <div className="flex gap-1.5 shrink-0">
                     <button
-                      onClick={() => updateInvitation(inv.id, 'accepted')}
+                      onClick={async () => {
+                        if (await showConfirm(`"${inv.teamName}" 팀의 초대를 수락하시겠습니까?`)) updateInvitation(inv.id, 'accepted');
+                      }}
                       className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 text-gray-300 border border-white/10 hover:bg-green-900/30 hover:text-green-400 hover:border-green-700/40 transition-colors"
                       title="수락"
                     >
@@ -139,7 +144,9 @@ export default function TeamsTab({ detail }: Props) {
                       </svg>
                     </button>
                     <button
-                      onClick={() => updateInvitation(inv.id, 'rejected')}
+                      onClick={async () => {
+                        if (await showConfirm(`"${inv.teamName}" 팀의 초대를 거절하시겠습니까?`)) updateInvitation(inv.id, 'rejected');
+                      }}
                       className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 text-gray-300 border border-white/10 hover:bg-red-900/20 hover:text-red-400 hover:border-red-700/30 transition-colors"
                       title="거절"
                     >

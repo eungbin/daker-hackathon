@@ -5,6 +5,7 @@ import { useAuth } from '../store/AuthContext';
 import CampSidebar from '../components/CampSidebar';
 import Pager from '../components/Pager';
 import { usePagination } from '../hooks/usePagination';
+import { showConfirm } from '../components/Dialog';
 import type { User } from '../types';
 
 export default function TeamDetail() {
@@ -58,8 +59,11 @@ export default function TeamDetail() {
     setEditingMember(null);
   };
 
-  const kickMember = (memberId: string) => {
+  const kickMember = async (memberId: string) => {
     if (!team) return;
+    const displayName = userMap[memberId]?.username ?? memberId;
+    const ok = await showConfirm(`"${displayName}"을(를) 팀에서 추방하시겠습니까?`);
+    if (!ok) return;
     const newMembers = (team.members ?? []).filter(id => id !== memberId);
     const newRoles = { ...(team.memberRoles ?? {}) };
     delete newRoles[memberId];
@@ -314,13 +318,17 @@ export default function TeamDetail() {
                             </div>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => updateInvitation(inv.id, 'accepted')}
+                                onClick={async () => {
+                                  if (await showConfirm(`"${displayName}"의 가입 요청을 승인하시겠습니까?`)) updateInvitation(inv.id, 'accepted');
+                                }}
                                 className="text-xs bg-primary/20 hover:bg-primary/30 text-primary px-3 py-1.5 rounded-lg font-medium transition-colors"
                               >
                                 승인
                               </button>
                               <button
-                                onClick={() => updateInvitation(inv.id, 'rejected')}
+                                onClick={async () => {
+                                  if (await showConfirm(`"${displayName}"의 가입 요청을 거절하시겠습니까?`)) updateInvitation(inv.id, 'rejected');
+                                }}
                                 className="text-xs bg-white/5 hover:bg-white/10 text-gray-400 px-3 py-1.5 rounded-lg transition-colors"
                               >
                                 거절

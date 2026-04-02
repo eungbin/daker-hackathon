@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import type { Invitation, Team } from '../types';
 import { useAuth } from '../store/AuthContext';
 import { useStoreContext } from '../store/StoreContext';
+import { showConfirm } from './Dialog';
 
 function timeAgo(dateStr: string): string {
   const now = new Date();
@@ -61,8 +62,10 @@ export default function TeamCard({ team }: { team: Team }) {
     [invitations, currentUser, team.teamCode]
   );
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!currentUser) return;
+    const ok = await showConfirm(`"${team.name}" 팀에 가입신청하시겠습니까?`);
+    if (!ok) return;
     const invitation: Invitation = {
       id: `inv-${Date.now()}`,
       hackathonSlug: team.hackathonSlugs?.[0] ?? '',
@@ -90,9 +93,6 @@ export default function TeamCard({ team }: { team: Team }) {
 
   const applyButton = (() => {
     if (!canApply) return null;
-    if (latestRequest?.status === 'accepted') {
-      return <span className="text-xs px-3 py-1 rounded-lg bg-blue-900/40 text-blue-400 border border-blue-700/50">합류 완료</span>;
-    }
     if (latestRequest?.status === 'rejected') {
       return <span className="text-xs px-3 py-1 rounded-lg bg-red-900/30 text-red-400 border border-red-700/40">거절됨</span>;
     }
