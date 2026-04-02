@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { StoreProvider } from './store/StoreContext';
 import { AuthProvider } from './store/AuthContext';
+import { MobileDrawerProvider } from './store/MobileDrawerContext';
 import ToastContainer from './components/ToastContainer';
 import DialogContainer from './components/Dialog';
 import Navbar from './components/Navbar';
@@ -17,9 +18,10 @@ export default function App() {
   return (
     <AuthProvider>
       <StoreProvider>
+        <MobileDrawerProvider>
         <BrowserRouter>
           <Navbar />
-          <main className="pt-14 min-h-screen flex flex-col">
+          <main className="pt-14 pb-14 md:pb-0 min-h-screen flex flex-col">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/hackathons" element={<Hackathons />} />
@@ -34,6 +36,7 @@ export default function App() {
           <ToastContainer />
           <DialogContainer />
         </BrowserRouter>
+        </MobileDrawerProvider>
       </StoreProvider>
     </AuthProvider>
   );

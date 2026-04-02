@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStoreContext } from '../../store/StoreContext';
 import { useAuth } from '../../store/AuthContext';
+import { useMobileDrawer } from '../../store/MobileDrawerContext';
 import { showConfirm } from '../../components/Dialog';
 import JoinHackathonModal from './JoinHackathonModal';
 import StatusBadge from '../../components/StatusBadge';
@@ -46,9 +47,32 @@ export default function HackathonDetail() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
-  const [showSchedulePanel, setShowSchedulePanel] = useState(false);
-  const [showJoinModal, setShowJoinModal] = useState(false);
+const [showJoinModal, setShowJoinModal] = useState(false);
+  const { setDrawerContent, closeDrawer } = useMobileDrawer();
   const hackathon = hackathons.find(h => h.slug === slug);
+
+  // 모바일 드로어에 탭 네비게이션 주입
+  useEffect(() => {
+    setDrawerContent(
+      <nav className="p-3 space-y-0.5">
+        {tabs.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => { setActiveTab(tab.key); closeDrawer(); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-left transition-all ${
+              activeTab === tab.key
+                ? 'bg-primary/20 text-white font-medium'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+    );
+    return () => setDrawerContent(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
   const detail = details[slug || ''];
   const hasMyTeam = currentUser
     ? teams.some(t => t.hackathonSlugs?.includes(slug ?? '') && (t.createdBy === currentUser.id || t.members?.includes(currentUser.id)))
@@ -181,87 +205,6 @@ export default function HackathonDetail() {
             </div>
           </aside>
 
-          {/* Mobile tab bar */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0D0D10] border-t border-card-border px-2 py-1.5">
-            <div className="flex overflow-x-auto justify-around">
-              {tabs.map(tab => (
-                <button
-                  key={tab.key}
-                  onClick={() => { setActiveTab(tab.key); setShowSchedulePanel(false); }}
-                  className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-1.5 text-xs transition-all border-b-2 ${
-                    activeTab === tab.key && !showSchedulePanel
-                      ? 'text-primary border-primary'
-                      : 'text-gray-500 border-transparent'
-                  }`}
-                >
-                  <span className='text-sm'>{tab.label}</span>
-                </button>
-              ))}
-              {/* 일정 버튼 */}
-              <button
-                onClick={() => setShowSchedulePanel(v => !v)}
-                className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-1.5 text-xs transition-all border-b-2 ${
-                  showSchedulePanel ? 'text-primary border-primary' : 'text-gray-500 border-transparent'
-                }`}
-              >
-                <span>일정</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Schedule slide-up panel (mobile) */}
-          {showSchedulePanel && (
-            <>
-              <div
-                className="md:hidden fixed inset-0 z-40 bg-black/50"
-                onClick={() => setShowSchedulePanel(false)}
-              />
-              <div className="md:hidden fixed bottom-[56px] left-0 right-0 z-50 bg-card border-t border-card-border rounded-t-2xl px-5 pt-4 pb-6 animate-slide-up">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span>📅</span>
-                    <h4 className="text-sm font-semibold text-white">일정</h4>
-                    <span className="text-xs text-gray-500">{schedule.timezone.replace('Asia/', '')}</span>
-                  </div>
-                  <button
-                    onClick={() => setShowSchedulePanel(false)}
-                    className="text-gray-500 hover:text-white transition-colors p-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                {/* drag handle */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-gray-600 rounded-full" />
-                <div className="space-y-3">
-                  {schedule.milestones.map((m, i) => {
-                    const past = isPast(m.at);
-                    const current = isCurrent(m.at, schedule.milestones[i + 1]?.at);
-                    return (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                          current ? 'bg-primary shadow-sm shadow-primary/50' :
-                          past ? 'bg-green-500' : 'bg-gray-600'
-                        }`} />
-                        <div className="flex-1 flex items-start justify-between gap-2">
-                          <p className={`text-sm leading-tight ${
-                            current ? 'text-white font-medium' :
-                            past ? 'text-gray-500' : 'text-gray-300'
-                          }`}>
-                            {m.name}
-                          </p>
-                          <p className={`text-xs shrink-0 ${past ? 'text-gray-600' : 'text-gray-500'}`}>
-                            {formatDate(m.at)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
 
           {/* Content */}
           <main className="flex-1 min-w-0 pb-20 md:pb-0">

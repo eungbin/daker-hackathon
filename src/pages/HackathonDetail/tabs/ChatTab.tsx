@@ -124,10 +124,21 @@ export default function ChatTab({ detail }: Props) {
   }
 
   return (
-    <div className="bg-card border border-card-border rounded-xl flex overflow-hidden h-[580px]">
+    <div className="bg-card border border-card-border rounded-xl flex overflow-hidden h-[580px] relative">
 
-      {/* Sidebar */}
-      <div className={`flex flex-col border-r border-card-border bg-neutral transition-all duration-200 shrink-0 ${sidebarOpen ? 'w-44' : 'w-0 overflow-hidden border-r-0'}`}>
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden absolute inset-0 z-10 bg-black/50"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — desktop: pushes content / mobile: overlays */}
+      <div className={`flex flex-col border-r border-card-border bg-neutral transition-all duration-200 shrink-0
+        md:relative md:z-auto
+        absolute inset-y-0 left-0 z-20
+        ${sidebarOpen ? 'w-44' : 'w-0 overflow-hidden border-r-0'}`}>
         {/* Sidebar header */}
         <div className="px-3 pt-4 pb-2 flex items-center justify-between shrink-0">
           <span className="text-gray-500 text-[10px] font-bold tracking-widest uppercase select-none">Channels</span>
@@ -145,7 +156,7 @@ export default function ChatTab({ detail }: Props) {
             return (
               <button
                 key={ch.key}
-                onClick={() => setActiveChannel(ch.key)}
+                onClick={() => { setActiveChannel(ch.key); if (window.innerWidth < 768) setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left transition-colors group ${
                   isActive
                     ? 'bg-primary/20 text-white'
